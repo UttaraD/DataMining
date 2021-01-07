@@ -8,7 +8,7 @@
 - Author, gives life to a book. But how to derive meaning out of Author? For this i have categorized the author as Low,Medium and high based on the number of times author appeared in best sellers list
 - Added a new variable Words_Name thinking that number of words in title of the book could impact on the reader
 ## Algorithms and Error Metrics
-- 
+- I have used Multiple Linear regression, KNN and Regression trees algorithms to predict the outcome variable Price. I have calculated the accuracy metrics to choose which model fits in the best to predict the average price of the best selling book in amazon.
 
 
 
