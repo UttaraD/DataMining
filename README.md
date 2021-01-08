@@ -11,7 +11,7 @@
 - I have used Multiple Linear regression, KNN and Regression trees algorithms to predict the outcome variable Price. I have calculated the accuracy metrics to choose which model fits in the best to predict the average price of the best selling book in amazon.
 - Regression Trees gives lesser RMSE which is more accuracy.
 ## Conclusion
-- Regression trees is a better model which gives a better accuracy. popularity, genre, user rating are the main predictors for price
+- Regression trees is a better model which gives a better accuracy. The variables popularity, genre, user rating are the main predictors for price
 
 
 
