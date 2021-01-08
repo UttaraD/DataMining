@@ -9,6 +9,9 @@
 - Added a new variable Words_Name thinking that number of words in title of the book could impact on the reader
 ## Algorithms and Error Metrics
 - I have used Multiple Linear regression, KNN and Regression trees algorithms to predict the outcome variable Price. I have calculated the accuracy metrics to choose which model fits in the best to predict the average price of the best selling book in amazon.
+- Regression Trees gives lesser RMSE which is more accuracy.
+## Conclusion
+- Regression trees is a better model which gives a better accuracy. popularity, genre, user rating are the main predictors for price
 
 
 
