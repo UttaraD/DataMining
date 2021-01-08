@@ -3,6 +3,7 @@ library(forecast)
 library(reshape)
 library(leaps)
 library(FNN)
+library(caret)
 library(rpart)
 library(rpart.plot)
 library(glmulti)
@@ -11,6 +12,7 @@ library(neuralnet)
 library(FNN)
 library(scales)
 library(RColorBrewer)
+library(ggplot2)
 library(dplyr)
 library(tidyr)
 
@@ -35,6 +37,7 @@ books.df$Price <- ifelse(books.df$Price==0, mean(books.df$Price), books.df$Price
 books.df[,c(7,10)] <- lapply(books.df[,c(7,10)] , factor)
 summary(books.df)
 books_new.df <- books.df[,c(-1,-2,-6,-9)]
+
 summary(books_new.df)
 
 round(cor(books_new.df[,c(1,2,3,5)]),2)
@@ -86,6 +89,9 @@ summary(books.mvr)
 books.pred <- predict(books.mvr, newdata = valid.df)
 accuracy(books.pred, valid.df$Price)
 
+#                ME     RMSE      MAE       MPE     MAPE
+#Test set -0.7970001 8.591948 6.229697 -49.80846 70.73893
+
 # Adjusted R sqaure 0.03825, Residual standard error: 11.85
 #Important variables
 #User.Rating , Genre
@@ -103,14 +109,16 @@ summary(books.lm.step)  # Which variables were dropped? -- Reviews and Words_Nam
 books.lm.step.pred <- predict(books.lm.step, valid.df)
 accuracy(books.lm.step.pred, valid.df$Price)
 
+#                ME     RMSE      MAE       MPE    MAPE
+#Test set -0.7727052 8.654523 6.225845 -49.84915 70.5931
+
 #final model
 booksfinal.mvr<-lm(Price ~  ., data=train.df[,c(-1,-2,-5)])
 options(scipen=999) # avoid scientific notation
 summary(booksfinal.mvr)
-booksfinal.pred <- predict(booksfinal.mvr, newdata = valid.df)
-accuracy(booksfinal.pred, valid.df$Price) # RMSE - 8.62617
-mean(booksfinal.pred)
-
+booksfinal.pred <- predict(booksfinal.mvr, newdata = test.df)
+accuracy(booksfinal.pred, test.df$Price) # RMSE - 8.648565
+mean(booksfinal.pred) #14.17292
 
 #==================================================================#
 #Using Knn
@@ -250,6 +258,9 @@ rpart.plot(tree.books)
 #Importance of different predictors on the outcome variable (Reviews) based on Default Tree:
 tree.books$variable.importance
 
+#Reviews User.Rating  Words_Name       Genre  popularity
+#6430.021    4987.668    3112.940    1910.852    1876.148
+
 #Using the default Regression Tree for predicting Price
 
 pred_tree=predict(tree.books,newdata=validtree.df)
@@ -257,7 +268,8 @@ pred_tree=predict(tree.books,newdata=validtree.df)
 #Calculating the RMSE and MAE for the default Regression Tree
 
 #RMSE
-sqrt(mean((validtree.df$Price-pred_tree)^2)) #RMSE=8.972496
+#sqrt(mean((validtree.df$Price-pred_tree)^2)) #RMSE=8.972496
+accuracy(pred_tree, validtree.df$Price)
 
 #Pruning the tree based on best cp:
 Bookscv.ct <- rpart(Price ~ ., data = traintree.df,
@@ -273,7 +285,9 @@ rpart.plot(Bookspruned.ct)
 pred_bestpr=predict(Bookspruned.ct,newdata=validtree.df)
 
 #RMSE for Tree with best cp:
-sqrt(mean((validtree.df$Price-pred_bestpr)^2))#RMSE=8.684689
+#sqrt(mean((validtree.df$Price-pred_bestpr)^2))#RMSE=8.684689
+accuracy(pred_bestpr, validtree.df$Price)
+
 
 #Random Forest
 library(randomForest)
@@ -287,7 +301,8 @@ varImpPlot(Booksrf, type = 1)
 
 pred_rf=predict(Booksrf,newdata=validtree.df)
 #RMSE for Random Forest:
-sqrt(mean((validtree.df$Price-pred_rf)^2)) #RMSE=9.01801
+#sqrt(mean((validtree.df$Price-pred_rf)^2)) #RMSE=9.01801
+accuracy(pred_rf, validtree.df$Price)
 
 #Optimizing number of trees:
 
@@ -319,14 +334,17 @@ Booksrf_best <- randomForest(Price ~ ., data = traintree.df, ntree = 3710,
 varImpPlot(Booksrf_best, type = 1)
 
 pred_rfbest=predict(Booksrf_best,newdata=validtree.df)
-#RMSE for optimized Randome Forest:
-sqrt(mean((validtree.df$Price - pred_rfbest)^2))#RMSE - 6.806961
+
+#RMSE for optimized Random Forest:
+#sqrt(mean((validtree.df$Price - pred_rfbest)^2))#RMSE - 6.806961
+accuracy(pred_rfbest, validtree.df$Price)
 
 #Predicting for test set based on just Random Forest:
-testpred_rf=predict(Booksrf,newdata=testtree.df)
-#RMSE for Random Forest:
-sqrt(mean((testtree.df$Price-pred_rf)^2))# RMSE - 12.43962
+testpred_rf=predict(Booksrf_best,newdata=testtree.df)
 
+#RMSE for Random Forest:
+#sqrt(mean((testtree.df$Price-testpred_rf)^2))# RMSE - 5.463445
+accuracy(testpred_rf, testtree.df$Price)
 #Average Prediction on test set:
 mean(testpred_rf)#13.74839
 
